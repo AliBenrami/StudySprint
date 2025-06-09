@@ -1,6 +1,6 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
+import { Card } from "@/app/components/ui/card";
 
 export default function InvitePage() {
   return (

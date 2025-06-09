@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/app/components/ui/card";
 import Link from "next/link";
+import { supabase } from "../lib/supabaseClient";
 
 // Types for our data
 interface StudyStats {
@@ -56,6 +57,25 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
+    const fetchUserStats = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const { data, error } = await supabase
+        .from("user_stats")
+        .select("*")
+        .eq("id", user?.id)
+        .single();
+      if (error) {
+        console.error(error);
+      } else {
+        setStats(data);
+      }
+      setIsLoading(false);
+    };
+
+    fetchUserStats();
+
     const handleScroll = () => {
       const statsSection = document.getElementById("stats");
       if (statsSection) {
@@ -87,33 +107,71 @@ export default function DashboardPage() {
       >
         <Card className="p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
           <h3 className="text-sm font-medium text-gray-500">Total Sessions</h3>
-          <p className="text-2xl font-bold mt-2 text-blue-600">
-            {stats?.totalSessions ?? templateStats.totalSessions}
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            Start your first session!
-          </p>
+          {isLoading ? (
+            <div className="animate-pulse">
+              <div className="h-8 w-16 bg-gray-200 rounded mt-2"></div>
+              <div className="h-4 w-32 bg-gray-200 rounded mt-1"></div>
+            </div>
+          ) : (
+            <>
+              <p className="text-2xl font-bold mt-2 text-blue-600">
+                {stats?.totalSessions ?? templateStats.totalSessions}
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                Start your first session!
+              </p>
+            </>
+          )}
         </Card>
         <Card className="p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
           <h3 className="text-sm font-medium text-gray-500">Study Time</h3>
-          <p className="text-2xl font-bold mt-2 text-indigo-600">
-            {stats?.studyTime ?? templateStats.studyTime}h
-          </p>
-          <p className="text-sm text-gray-500 mt-1">Track your study hours</p>
+          {isLoading ? (
+            <div className="animate-pulse">
+              <div className="h-8 w-16 bg-gray-200 rounded mt-2"></div>
+              <div className="h-4 w-32 bg-gray-200 rounded mt-1"></div>
+            </div>
+          ) : (
+            <>
+              <p className="text-2xl font-bold mt-2 text-indigo-600">
+                {stats?.studyTime ?? templateStats.studyTime}h
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                Track your study hours
+              </p>
+            </>
+          )}
         </Card>
         <Card className="p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
           <h3 className="text-sm font-medium text-gray-500">Focus Score</h3>
-          <p className="text-2xl font-bold mt-2 text-green-600">
-            {stats?.focusScore ?? templateStats.focusScore}%
-          </p>
-          <p className="text-sm text-gray-500 mt-1">Measure your focus</p>
+          {isLoading ? (
+            <div className="animate-pulse">
+              <div className="h-8 w-16 bg-gray-200 rounded mt-2"></div>
+              <div className="h-4 w-32 bg-gray-200 rounded mt-1"></div>
+            </div>
+          ) : (
+            <>
+              <p className="text-2xl font-bold mt-2 text-green-600">
+                {stats?.focusScore ?? templateStats.focusScore}%
+              </p>
+              <p className="text-sm text-gray-500 mt-1">Measure your focus</p>
+            </>
+          )}
         </Card>
         <Card className="p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
           <h3 className="text-sm font-medium text-gray-500">Streak</h3>
-          <p className="text-2xl font-bold mt-2 text-purple-600">
-            {stats?.streak ?? templateStats.streak} days
-          </p>
-          <p className="text-sm text-gray-500 mt-1">Build your streak</p>
+          {isLoading ? (
+            <div className="animate-pulse">
+              <div className="h-8 w-16 bg-gray-200 rounded mt-2"></div>
+              <div className="h-4 w-32 bg-gray-200 rounded mt-1"></div>
+            </div>
+          ) : (
+            <>
+              <p className="text-2xl font-bold mt-2 text-purple-600">
+                {stats?.streak ?? templateStats.streak} days
+              </p>
+              <p className="text-sm text-gray-500 mt-1">Build your streak</p>
+            </>
+          )}
         </Card>
       </div>
 

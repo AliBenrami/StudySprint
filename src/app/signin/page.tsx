@@ -3,13 +3,54 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import Nav from "../../components/Nav";
+import Nav from "../components/Nav";
+import { supabase } from "../lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const checkIfUserExists = async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error(error);
+    } else {
+      console.log(data);
+      router.push("/signin/callback");
+    }
+  };
+
+  const handleSignIn = async () => {
+    checkIfUserExists();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      console.error(error);
+    } else {
+      console.log(data);
+    }
+    router.push("/signin/callback");
+  };
+  const googleSignIn = async () => {
+    checkIfUserExists();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/signin/callback`,
+      },
+    });
+    if (error) {
+      console.error(error);
+    } else {
+      router.push(data.url!);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +60,7 @@ export default function SignIn() {
     setTimeout(() => {
       // Here you would typically handle the authentication
       // For now, we'll just redirect to home
+      handleSignIn();
       window.location.href = "/";
       setIsLoading(false);
     }, 1500);
@@ -158,6 +200,7 @@ export default function SignIn() {
 
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <button
+                  onClick={googleSignIn}
                   type="button"
                   className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >

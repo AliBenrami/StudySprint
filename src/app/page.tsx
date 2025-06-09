@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Nav from "../components/Nav";
-import Footer from "../components/Footer";
+import Nav from "./components/Nav";
+import Footer from "./components/Footer";
 
 export default function Home() {
   const router = useRouter();

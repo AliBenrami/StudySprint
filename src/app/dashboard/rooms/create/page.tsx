@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/app/components/ui/card";
 import { useRouter } from "next/navigation";
 
 export default function CreateRoomPage() {
