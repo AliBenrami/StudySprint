@@ -1,24 +1,176 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/app/components/ui/card";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { supabase, getUserId } from "@/app/lib/supabaseClient";
 
 interface StudyRoom {
   id: string;
-  name: string;
-  subject: string;
+  title: string;
+  created_by: string;
+  created_at: string;
+  is_active: boolean;
   participants: number;
-  maxParticipants: number;
-  duration: number;
-  startTime: string;
-  status: "active" | "scheduled" | "completed";
+}
+
+interface ParticipantPayload {
+  new: { room_id: string } | null;
+  old: { room_id: string } | null;
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {[...Array(6)].map((_, index) => (
+        <Card key={index} className="p-6 animate-pulse">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <div className="h-5 w-32 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 w-24 bg-gray-200 rounded"></div>
+            </div>
+            <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <div className="h-4 w-20 bg-gray-200 rounded"></div>
+              <div className="h-4 w-16 bg-gray-200 rounded"></div>
+            </div>
+            <div className="flex justify-between">
+              <div className="h-4 w-24 bg-gray-200 rounded"></div>
+              <div className="h-4 w-20 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+          <div className="h-10 w-full bg-gray-200 rounded-lg mt-4"></div>
+        </Card>
+      ))}
+    </div>
+  );
 }
 
 export default function StudyRoomsPage() {
   const [studyRooms, setStudyRooms] = useState<StudyRoom[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId();
+      if (id) {
+        setCurrentUserId(id);
+      }
+    };
+    fetchUserId();
+  }, []);
+
+  const disableRoom = async (roomId: string) => {
+    const { error } = await supabase
+      .from("sprint_rooms")
+      .update({ is_active: false })
+      .eq("id", roomId);
+
+    if (error) {
+      console.error("Error disabling room:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchStudyRooms = async () => {
+      try {
+        // Fetch active rooms
+        const { data: rooms, error: roomsError } = await supabase
+          .from("sprint_rooms")
+          .select("*")
+          .eq("is_active", true);
+
+        if (roomsError) {
+          console.error("Error fetching rooms:", roomsError);
+          return;
+        }
+
+        // For each room, get the count of active participants
+        const roomsWithParticipants = await Promise.all(
+          rooms.map(async (room) => {
+            const { count, error: countError } = await supabase
+              .from("sprint_participants")
+              .select("*", { count: "exact", head: true })
+              .eq("room_id", room.id)
+              .eq("is_active", true);
+
+            if (countError) {
+              console.error("Error fetching participant count:", countError);
+              return { ...room, participants: 0 };
+            }
+
+            return { ...room, participants: count || 0 };
+          })
+        );
+
+        setStudyRooms(roomsWithParticipants);
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudyRooms();
+
+    // Set up real-time subscriptions
+    const roomSubscription = supabase
+      .channel("rooms_changes")
+      .on(
+        "postgres_changes" as any,
+        {
+          event: "*",
+          schema: "public",
+          table: "sprint_rooms",
+        },
+        async () => {
+          // Refetch all rooms when any room changes
+          fetchStudyRooms();
+        }
+      )
+      .subscribe();
+
+    const participantSubscription = supabase
+      .channel("participants_changes")
+      .on(
+        "postgres_changes" as any,
+        {
+          event: "*",
+          schema: "public",
+          table: "sprint_participants",
+        },
+        async (payload: ParticipantPayload) => {
+          // When a participant changes, update the count for that room
+          const roomId = payload.new?.room_id || payload.old?.room_id;
+          if (roomId) {
+            const { count, error } = await supabase
+              .from("sprint_participants")
+              .select("*", { count: "exact", head: true })
+              .eq("room_id", roomId)
+              .eq("is_active", true);
+
+            if (!error && count !== null) {
+              setStudyRooms((prevRooms) =>
+                prevRooms.map((room) =>
+                  room.id === roomId ? { ...room, participants: count } : room
+                )
+              );
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      roomSubscription.unsubscribe();
+      participantSubscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <div>
@@ -39,84 +191,154 @@ export default function StudyRoomsPage() {
       </div>
 
       {/* Active Study Rooms */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {studyRooms.length > 0 ? (
-          studyRooms.map((room) => (
-            <Card
-              key={room.id}
-              className="p-6 hover:shadow-md hover:border-blue-200 transition-all"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900">{room.name}</h3>
-                  <p className="text-sm text-gray-500">{room.subject}</p>
+      {loading ? (
+        <LoadingSkeleton />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {studyRooms.length > 0 ? (
+            studyRooms.map((room) => (
+              <Card
+                key={room.id}
+                className="p-6 hover:shadow-lg hover:border-blue-200 transition-all duration-200"
+              >
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {room.title}
+                      </h3>
+                      <div className="flex items-center space-x-2 text-sm text-gray-500">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <span>
+                          {new Date(room.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-full">
+                      <svg
+                        className="w-4 h-4 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                        />
+                      </svg>
+                      <span className="text-sm font-medium text-blue-600">
+                        {room.participants}{" "}
+                        {room.participants === 1
+                          ? "participant"
+                          : "participants"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-end space-x-3 pt-2">
+                    {currentUserId === room.created_by && room.is_active && (
+                      <button
+                        onClick={() => disableRoom(room.id)}
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 hover:bg-red-50 hover:border-red-300 rounded-lg transition-all duration-200 shadow-sm hover:shadow"
+                      >
+                        <svg
+                          className="w-4 h-4 mr-1.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                          />
+                        </svg>
+                        Disable
+                      </button>
+                    )}
+                    <button
+                      onClick={() => router.push(`/dashboard/rooms/${room.id}`)}
+                      disabled={!room.is_active}
+                      className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                        room.is_active
+                          ? "bg-blue-600 hover:bg-blue-700 text-white hover:shadow-md"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                    >
+                      <svg
+                        className="w-4 h-4 mr-1.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                        />
+                      </svg>
+                      {room.is_active ? "Join Room" : "Room Disabled"}
+                    </button>
+                  </div>
                 </div>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    room.status === "active"
-                      ? "bg-green-100 text-green-800"
-                      : room.status === "scheduled"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {room.status}
-                </span>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Duration</span>
-                  <span className="text-gray-900">{room.duration} min</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Participants</span>
-                  <span className="text-gray-900">
-                    {room.participants}/{room.maxParticipants}
-                  </span>
-                </div>
-              </div>
-              <button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                Join Room
-              </button>
-            </Card>
-          ))
-        ) : (
-          <div className="col-span-full">
-            <Card className="p-6">
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <svg
-                    className="w-8 h-8 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+              </Card>
+            ))
+          ) : (
+            <div className="col-span-full">
+              <Card className="p-6">
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <svg
+                      className="w-8 h-8 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Study Rooms Yet
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Create your first study room to start collaborating with
+                    others
+                  </p>
+                  <button
+                    onClick={() => router.push("/dashboard/rooms/create")}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                    />
-                  </svg>
+                    Create Your First Room
+                  </button>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No Study Rooms Yet
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Create your first study room to start collaborating with
-                  others
-                </p>
-                <button
-                  onClick={() => router.push("/dashboard/rooms/create")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  Create Your First Room
-                </button>
-              </div>
-            </Card>
-          </div>
-        )}
-      </div>
+              </Card>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Quick Tips */}
       <div className="mt-12">

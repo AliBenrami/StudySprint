@@ -3,18 +3,37 @@
 import { useState } from "react";
 import { Card } from "@/app/components/ui/card";
 import { useRouter } from "next/navigation";
+import { getUserId, supabase } from "@/app/lib/supabaseClient";
 
 export default function CreateRoomPage() {
   const router = useRouter();
-  const [duration, setDuration] = useState(25);
+
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
 
+  const createRoom = async () => {
+    const { data, error } = await supabase
+      .from("sprint_rooms")
+      .insert({
+        title: name,
+        created_by: await getUserId(),
+        is_active: true,
+        subject: subject,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    router.push(`/dashboard/rooms/${data.id}`);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically save the room data
-    // For now, we'll just redirect back to the rooms page
-    router.push("/dashboard/rooms");
+    createRoom();
   };
 
   return (
@@ -53,30 +72,6 @@ export default function CreateRoomPage() {
               placeholder="e.g., Calculus"
               required
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Session Duration (minutes)
-            </label>
-            <div className="flex items-center space-x-4">
-              <input
-                type="range"
-                min="5"
-                max="120"
-                step="5"
-                value={duration}
-                onChange={(e) => setDuration(parseInt(e.target.value))}
-                className="flex-1"
-              />
-              <span className="text-lg font-medium text-gray-900 w-16 text-center">
-                {duration} min
-              </span>
-            </div>
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>5 min</span>
-              <span>120 min</span>
-            </div>
           </div>
 
           <div className="flex justify-end space-x-4">

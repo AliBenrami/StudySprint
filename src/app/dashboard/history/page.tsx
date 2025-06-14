@@ -1,48 +1,104 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/app/components/ui/card";
+import { supabase, getUserId } from "@/app/lib/supabaseClient";
 
-interface StudySession {
+interface StudyRoom {
   id: string;
+  title: string;
   subject: string;
-  roomName: string;
+  created_by: string;
+  created_at: string;
+  is_active: boolean;
   participants: number;
-  duration: number;
-  timestamp: string;
-  focusScore: number;
-  notes?: string;
-  tags?: string[];
 }
 
 export default function StudyHistoryPage() {
-  const [studyHistory, setStudyHistory] = useState<StudySession[]>([]);
+  const [studyHistory, setStudyHistory] = useState<StudyRoom[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     subject: "",
     startDate: "",
     endDate: "",
-    minFocusScore: 0,
   });
-  const [sortBy, setSortBy] = useState<"date" | "duration" | "focusScore">(
-    "date"
-  );
+  const [sortBy, setSortBy] = useState<"date" | "participants">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  useEffect(() => {
+    const fetchStudyHistory = async () => {
+      try {
+        // Get current user ID
+        const userId = await getUserId();
+        if (!userId) return;
+
+        // First get all rooms where user was a participant
+        const { data: participantRooms, error: participantError } =
+          await supabase
+            .from("sprint_participants")
+            .select("room_id")
+            .eq("user_id", userId);
+
+        if (participantError) {
+          console.error("Error fetching participant rooms:", participantError);
+          return;
+        }
+
+        const roomIds = participantRooms.map((p) => p.room_id);
+
+        // Then fetch the inactive rooms from those IDs
+        const { data: rooms, error: roomsError } = await supabase
+          .from("sprint_rooms")
+          .select("*")
+          .in("id", roomIds)
+          .eq("is_active", false);
+
+        if (roomsError) {
+          console.error("Error fetching rooms:", roomsError);
+          return;
+        }
+
+        // For each room, get the count of participants
+        const roomsWithParticipants = await Promise.all(
+          rooms.map(async (room) => {
+            const { count, error: countError } = await supabase
+              .from("sprint_participants")
+              .select("*", { count: "exact", head: true })
+              .eq("room_id", room.id)
+              .eq("is_active", true);
+
+            if (countError) {
+              console.error("Error fetching participant count:", countError);
+              return { ...room, participants: 0 };
+            }
+
+            return { ...room, participants: count || 0 };
+          })
+        );
+
+        setStudyHistory(roomsWithParticipants);
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudyHistory();
+  }, []);
 
   const getFilteredHistory = () => {
     return studyHistory
-      .filter((session) => {
+      .filter((room) => {
         const matchesSubject = filters.subject
-          ? session.subject
-              .toLowerCase()
-              .includes(filters.subject.toLowerCase())
+          ? room.subject.toLowerCase().includes(filters.subject.toLowerCase())
           : true;
         const matchesDate =
           (!filters.startDate ||
-            new Date(session.timestamp) >= new Date(filters.startDate)) &&
+            new Date(room.created_at) >= new Date(filters.startDate)) &&
           (!filters.endDate ||
-            new Date(session.timestamp) <= new Date(filters.endDate));
-        const matchesFocusScore = session.focusScore >= filters.minFocusScore;
-        return matchesSubject && matchesDate && matchesFocusScore;
+            new Date(room.created_at) <= new Date(filters.endDate));
+        return matchesSubject && matchesDate;
       })
       .sort((a, b) => {
         const multiplier = sortOrder === "asc" ? 1 : -1;
@@ -50,32 +106,46 @@ export default function StudyHistoryPage() {
           case "date":
             return (
               multiplier *
-              (new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime())
+              (new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime())
             );
-          case "duration":
-            return multiplier * (a.duration - b.duration);
-          case "focusScore":
-            return multiplier * (a.focusScore - b.focusScore);
+          case "participants":
+            return multiplier * (a.participants - b.participants);
           default:
             return 0;
         }
       });
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, index) => (
+          <Card key={index} className="p-6 animate-pulse">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="h-5 w-32 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded"></div>
+              </div>
+              <div className="h-4 w-20 bg-gray-200 rounded"></div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900">Study History</h1>
-        <p className="text-gray-600 mt-2">
-          Track your study progress over time
-        </p>
+        <p className="text-gray-600 mt-2">View your completed study sessions</p>
       </div>
 
       {/* Filters */}
       <Card className="p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Subject
@@ -116,24 +186,6 @@ export default function StudyHistoryPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Min Focus Score
-            </label>
-            <input
-              type="number"
-              value={filters.minFocusScore}
-              onChange={(e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  minFocusScore: parseInt(e.target.value),
-                }))
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              min="0"
-              max="100"
-            />
-          </div>
         </div>
       </Card>
 
@@ -143,13 +195,12 @@ export default function StudyHistoryPage() {
           <select
             value={sortBy}
             onChange={(e) =>
-              setSortBy(e.target.value as "date" | "duration" | "focusScore")
+              setSortBy(e.target.value as "date" | "participants")
             }
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="date">Sort by Date</option>
-            <option value="duration">Sort by Duration</option>
-            <option value="focusScore">Sort by Focus Score</option>
+            <option value="participants">Sort by Participants</option>
           </select>
           <button
             onClick={() =>
@@ -165,21 +216,16 @@ export default function StudyHistoryPage() {
       {/* Study History List */}
       <div className="space-y-4">
         {studyHistory.length > 0 ? (
-          getFilteredHistory().map((session) => (
-            <Card key={session.id} className="p-6">
+          getFilteredHistory().map((room) => (
+            <Card key={room.id} className="p-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-semibold text-gray-900">
-                    {session.subject}
-                  </h3>
-                  <p className="text-sm text-gray-500">{session.roomName}</p>
+                  <h3 className="font-semibold text-gray-900">{room.title}</h3>
+                  <p className="text-sm text-gray-500">{room.subject}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-500">
-                    {new Date(session.timestamp).toLocaleDateString()}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {session.duration} minutes
+                    {new Date(room.created_at).toLocaleDateString()}
                   </p>
                 </div>
               </div>
@@ -200,37 +246,12 @@ export default function StudyHistoryPage() {
                       />
                     </svg>
                     <span className="text-sm text-gray-500">
-                      {session.participants} participants
+                      {room.participants}{" "}
+                      {room.participants === 1 ? "participant" : "participants"}
                     </span>
                   </div>
-                  {session.tags && (
-                    <div className="flex space-x-2">
-                      {session.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    session.focusScore >= 80
-                      ? "bg-green-100 text-green-800"
-                      : session.focusScore >= 60
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {session.focusScore}% Focus
                 </div>
               </div>
-              {session.notes && (
-                <p className="mt-4 text-sm text-gray-600">{session.notes}</p>
-              )}
             </Card>
           ))
         ) : (
@@ -255,7 +276,7 @@ export default function StudyHistoryPage() {
                 No Study History Yet
               </h3>
               <p className="text-gray-600 mb-4">
-                Your study sessions will appear here once you complete them
+                Your completed study sessions will appear here
               </p>
               <button
                 onClick={() => (window.location.href = "/dashboard/rooms")}
@@ -266,92 +287,6 @@ export default function StudyHistoryPage() {
             </div>
           </Card>
         )}
-      </div>
-
-      {/* Study Tips */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Study Tips</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-6">
-            <div className="flex items-start space-x-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">
-                  Track Your Progress
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Monitor your study habits and focus scores to improve over
-                  time
-                </p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-6">
-            <div className="flex items-start space-x-4">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Set Goals</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Use your history to set realistic study goals and track your
-                  progress
-                </p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-6">
-            <div className="flex items-start space-x-4">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Stay Consistent</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Regular study sessions help build better learning habits
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
       </div>
     </div>
   );

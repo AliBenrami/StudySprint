@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/app/components/ui/card";
 import Link from "next/link";
 import { supabase } from "../lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 // Types for our data
 interface StudyStats {
@@ -43,10 +44,81 @@ interface UpcomingSession {
   duration: number;
 }
 
+interface RecentActivity {
+  id: string;
+  room_id: string;
+  room_title: string;
+  subject: string;
+  created_at: string;
+  participants: number;
+}
+
+interface RoomData {
+  id: string;
+  title: string;
+  created_at: string;
+  created_by: string;
+}
+
+interface ParticipantData {
+  id: string;
+  room_id: string;
+  user_id: string;
+  joined_at: string;
+  sprint_rooms: {
+    title: string;
+  };
+}
+
+interface ParticipantWithRoom {
+  id: string;
+  room_id: string;
+  joined_at: string;
+  sprint_rooms: {
+    id: string;
+    title: string;
+    subject: string;
+    created_at: string;
+  };
+}
+
+function ActivitySkeleton() {
+  return (
+    <Card className="p-6">
+      <div className="space-y-6">
+        {[...Array(5)].map((_, index) => (
+          <div key={index} className="flex items-center space-x-4">
+            {/* Book icon skeleton */}
+            <div className="w-10 h-10 bg-gray-200 rounded-full animate-[pulse_2s_ease-in-out_infinite]"></div>
+
+            {/* Content skeleton */}
+            <div className="flex-1 space-y-2">
+              {/* Title skeleton */}
+              <div className="h-5 bg-gray-200 rounded w-3/4 animate-[pulse_2s_ease-in-out_infinite]"></div>
+
+              {/* Details skeleton */}
+              <div className="flex items-center space-x-2">
+                <div className="h-4 bg-gray-200 rounded w-1/4 animate-[pulse_2s_ease-in-out_infinite]"></div>
+                <div className="h-4 w-1 bg-gray-200 rounded animate-[pulse_2s_ease-in-out_infinite]"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/4 animate-[pulse_2s_ease-in-out_infinite]"></div>
+              </div>
+            </div>
+
+            {/* Date skeleton */}
+            <div className="h-4 bg-gray-200 rounded w-24 animate-[pulse_2s_ease-in-out_infinite]"></div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 export default function DashboardPage() {
   const [isVisible, setIsVisible] = useState(false);
   const [stats, setStats] = useState<StudyStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const router = useRouter();
 
   // Template data for when no real data is available
   const templateStats: StudyStats = {
@@ -89,6 +161,121 @@ export default function DashboardPage() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const fetchRecentActivity = async () => {
+      try {
+        setIsLoading(true);
+        // Get the current user
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          console.error("No user found");
+          setRecentActivity([]);
+          setIsLoading(false);
+          return;
+        }
+
+        // First get the room IDs the user has participated in
+        const { data: participantData, error: participantError } =
+          await supabase
+            .from("sprint_participants")
+            .select("room_id, joined_at")
+            .eq("user_id", user.id)
+            .order("joined_at", { ascending: false })
+            .limit(5);
+
+        if (participantError) {
+          console.error("Error fetching participant data:", participantError);
+          setRecentActivity([]);
+          setIsLoading(false);
+          return;
+        }
+
+        if (!participantData || participantData.length === 0) {
+          setRecentActivity([]);
+          setIsLoading(false);
+          return;
+        }
+
+        // Then fetch the room details for these rooms
+        const roomIds = participantData.map((p) => p.room_id);
+        const { data: roomsData, error: roomsError } = await supabase
+          .from("sprint_rooms")
+          .select("*")
+          .in("id", roomIds);
+
+        if (roomsError) {
+          console.error("Error fetching rooms:", roomsError);
+          setRecentActivity([]);
+          setIsLoading(false);
+          return;
+        }
+
+        // Get participant counts for each room
+        const roomsWithParticipants = await Promise.all(
+          roomsData.map(async (room) => {
+            const { count, error: countError } = await supabase
+              .from("sprint_participants")
+              .select("*", { count: "exact", head: true })
+              .eq("room_id", room.id)
+              .eq("is_active", true);
+
+            if (countError) {
+              console.error("Error fetching participant count:", countError);
+              return {
+                id: room.id,
+                room_id: room.id,
+                room_title: room.title,
+                subject: room.subject,
+                created_at: room.created_at,
+                participants: 0,
+              };
+            }
+
+            return {
+              id: room.id,
+              room_id: room.id,
+              room_title: room.title,
+              subject: room.subject,
+              created_at: room.created_at,
+              participants: count || 0,
+            };
+          })
+        );
+
+        // Only update state and loading after all data is ready
+        setRecentActivity(roomsWithParticipants);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error in fetchRecentActivity:", error);
+        setRecentActivity([]);
+        setIsLoading(false);
+      }
+    };
+
+    fetchRecentActivity();
+  }, []);
+
+  const getActivityIcon = () => {
+    return (
+      <svg
+        className="w-6 h-6 text-blue-600"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+        />
+      </svg>
+    );
+  };
 
   return (
     <div>
@@ -178,31 +365,65 @@ export default function DashboardPage() {
       {/* Recent Activity Section */}
       <div className="mt-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Recent Activity
+          Recent Study Rooms
         </h2>
-        <Card className="p-6">
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+        {isLoading ? (
+          <ActivitySkeleton />
+        ) : recentActivity.length > 0 ? (
+          <Card className="p-6">
+            <div className="space-y-4">
+              {recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                    {getActivityIcon()}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-gray-900 font-medium">
+                      {activity.room_title}
+                    </p>
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <span>{activity.subject}</span>
+                      <span>•</span>
+                      <span>
+                        {activity.participants}{" "}
+                        {activity.participants === 1
+                          ? "participant"
+                          : "participants"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {new Date(activity.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+              ))}
             </div>
-            <p className="text-gray-600">No recent activity</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Start a study session to see your activity here
-            </p>
-          </div>
-        </Card>
+          </Card>
+        ) : (
+          <Card className="p-6">
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <p className="text-gray-600">No recent study rooms</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Join a study room to see it here
+              </p>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Quick Actions */}

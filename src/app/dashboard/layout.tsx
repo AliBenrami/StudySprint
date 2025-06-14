@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { supabase } from "../lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 const menuItems = [
   { name: "Overview", path: "/dashboard" },
@@ -17,6 +19,12 @@ export default function DashboardLayout({
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const signOut = () => {
+    supabase.auth.signOut();
+    router.push("/signin");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
@@ -73,21 +81,30 @@ export default function DashboardLayout({
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
               StudySprint
             </h2>
-            <nav className="space-y-2">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  className={`block px-4 py-2 rounded-lg transition-colors ${
-                    pathname === item.path
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+            <nav className="space-y-2  flex flex-col justify-between">
+              <div>
+                {menuItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className={`block px-4 py-2 rounded-lg transition-colors ${
+                      pathname == item.path
+                        ? "bg-blue-50 text-blue-600"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+
+              <button
+                onClick={signOut}
+                className="block w-full px-4 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-red-500 text-left"
+              >
+                Sign Out
+              </button>
             </nav>
           </div>
         </div>
