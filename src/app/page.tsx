@@ -1,71 +1,75 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import Nav from "./components/Nav";
-import Footer from "./components/Footer";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const router = useRouter();
-  // For fade-in animation on scroll
-  const [isVisible, setIsVisible] = useState<{ [key: string]: boolean }>({
-    features: false,
-  });
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const featuresSection = document.getElementById("features");
-
-      if (featuresSection) {
-        const featuresSectionTop = featuresSection.getBoundingClientRect().top;
-        setIsVisible((prev) => ({
-          ...prev,
-          features: featuresSectionTop < window.innerHeight * 0.8,
-        }));
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    // Trigger once on load
-    handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    setIsVisible(true);
   }, []);
 
   const features = [
     {
-      title: "Live Study Sprints",
+      title: "Real-time Study Sessions",
       description:
-        "Join rooms with fellow learners for focused study sessions.",
-      icon: "/globe.svg",
+        "Join live study rooms and collaborate with others in real-time",
+      icon: (
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+          />
+        </svg>
+      ),
     },
     {
-      title: "Sprint Timer & Progress",
-      description: "Track your focus time with our Pomodoro-style timer.",
-      icon: "/file.svg",
+      title: "Focus Timer",
+      description: "Stay productive with our built-in Pomodoro timer",
+      icon: (
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      ),
     },
     {
-      title: "Matchmaking Queue",
-      description: "Get paired with students studying similar subjects.",
-      icon: "/window.svg",
-    },
-    {
-      title: "Task Board",
-      description: "Organize and prioritize your study goals efficiently.",
-      icon: "/file.svg",
-    },
-    {
-      title: "Post-Sprint Reflection",
-      description: "Review your progress and track your growth over time.",
-      icon: "/globe.svg",
-    },
-    {
-      title: "Built with Supabase",
-      description: "Reliable backend for real-time collaboration features.",
-      icon: "/vercel.svg",
+      title: "Progress Tracking",
+      description: "Monitor your study sessions and build consistent habits",
+      icon: (
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
+        </svg>
+      ),
     },
   ];
 
@@ -83,10 +87,6 @@ export default function Home() {
           className="absolute top-20 right-10 w-72 h-72 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"
           style={{ animationDelay: "2s" }}
         ></div>
-        <div
-          className="absolute bottom-20 left-1/4 w-56 h-56 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"
-          style={{ animationDelay: "4s" }}
-        ></div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
@@ -97,7 +97,7 @@ export default function Home() {
           </p>
           <button
             onClick={() => {
-              router.push("/dashboard");
+              router.push("/signin");
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg text-lg shadow-md transition-all"
           >
@@ -107,39 +107,27 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section
-        id="features"
-        className={`w-full px-4 sm:px-6 py-24 bg-white transition-all duration-1000 ${
-          isVisible.features
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-10"
-        }`}
-      >
+      <section className="w-full px-4 sm:px-6 py-24 bg-white">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-16">
-            Everything you need to stay focused
+            How StudySprint Works
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all"
+                className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all ${
+                  isVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-10"
+                }`}
                 style={{
                   transitionDelay: `${150 * index}ms`,
-                  opacity: isVisible.features ? 1 : 0,
-                  transform: isVisible.features
-                    ? "translateY(0)"
-                    : "translateY(20px)",
                 }}
               >
                 <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-5">
-                  <Image
-                    src={feature.icon}
-                    alt={feature.title}
-                    width={24}
-                    height={24}
-                  />
+                  {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-gray-900">
                   {feature.title}
@@ -151,68 +139,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="w-full px-4 sm:px-6 py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-16">
-            What our users say
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
-                  JD
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold">John Doe</h4>
-                  <p className="text-sm text-gray-500">
-                    Computer Science Student
-                  </p>
-                </div>
-              </div>
-              <p className="text-gray-600">
-                &quot;StudySprint helped me stay focused during finals week. The
-                live community aspect kept me accountable!&quot;
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">
-                  AS
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold">Anna Smith</h4>
-                  <p className="text-sm text-gray-500">Medical Student</p>
-                </div>
-              </div>
-              <p className="text-gray-600">
-                &quot;I love the matchmaking feature! Being paired with other
-                med students keeps me motivated during long study
-                sessions.&quot;
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">
-                  MJ
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold">Mike Johnson</h4>
-                  <p className="text-sm text-gray-500">Self-taught Developer</p>
-                </div>
-              </div>
-              <p className="text-gray-600">
-                &quot;The sprint timer and task board combination has doubled my
-                productivity. This app is a game changer!&quot;
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Call to Action Section */}
       <section className="w-full px-4 sm:px-6 py-20 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
         <div className="max-w-5xl mx-auto text-center">
@@ -220,16 +146,16 @@ export default function Home() {
             Ready to boost your productivity?
           </h2>
           <p className="text-xl mb-10 max-w-2xl mx-auto">
-            Join thousands of students achieving their goals with focused study
-            sprints.
+            Join StudySprint today and start building better study habits
           </p>
-          <button className="bg-white text-blue-600 hover:bg-gray-100 font-medium py-3 px-8 rounded-lg text-lg shadow-md transition-all">
+          <button
+            onClick={() => router.push("/signin")}
+            className="bg-white text-blue-600 hover:bg-gray-100 font-medium py-3 px-8 rounded-lg text-lg shadow-md transition-all"
+          >
             Start Sprinting Today
           </button>
         </div>
       </section>
-
-      <Footer></Footer>
     </main>
   );
 }

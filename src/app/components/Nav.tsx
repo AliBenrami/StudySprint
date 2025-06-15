@@ -14,24 +14,6 @@ const Nav = ({ page }: { page: string }) => {
           </Link>
         </div>
         <div className="hidden md:flex items-center space-x-8">
-          <Link
-            href="/#features"
-            className="text-gray-600 hover:text-blue-600 transition-colors"
-          >
-            Features
-          </Link>
-          <Link
-            href="/#"
-            className="text-gray-600 hover:text-blue-600 transition-colors"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="/#"
-            className="text-gray-600 hover:text-blue-600 transition-colors"
-          >
-            About
-          </Link>
           <button
             onClick={() => {
               router.push("/signin");
