@@ -15,9 +15,11 @@ interface StudyRoom {
   participants: number;
 }
 
-interface ParticipantPayload {
-  new: { room_id: string } | null;
-  old: { room_id: string } | null;
+interface RoomParticipantPayload {
+  id: string;
+  room_id: string;
+  user_id: string;
+  is_active: boolean;
 }
 
 function LoadingSkeleton() {
@@ -66,12 +68,32 @@ export default function StudyRoomsPage() {
   }, []);
 
   const disableRoom = async (roomId: string) => {
-    const { error } = await supabase
-      .from("sprint_rooms")
-      .update({ is_active: false })
-      .eq("id", roomId);
+    try {
+      // First, set all participants to inactive
+      const { error: participantsError } = await supabase
+        .from("sprint_participants")
+        .update({ is_active: false })
+        .eq("room_id", roomId);
 
-    if (error) {
+      if (participantsError) {
+        console.error("Error updating participants:", participantsError);
+        return;
+      }
+
+      // Then disable the room
+      const { error: roomError } = await supabase
+        .from("sprint_rooms")
+        .update({ is_active: false })
+        .eq("id", roomId);
+
+      if (roomError) {
+        console.error("Error disabling room:", roomError);
+        return;
+      }
+
+      // Immediately remove the room from the local state
+      setStudyRooms((prev) => prev.filter((room) => room.id !== roomId));
+    } catch (error) {
       console.error("Error disabling room:", error);
     }
   };
@@ -79,6 +101,10 @@ export default function StudyRoomsPage() {
   useEffect(() => {
     const fetchStudyRooms = async () => {
       try {
+        // Get current user ID
+        const userId = await getUserId();
+        if (!userId) return;
+
         // Fetch active rooms
         const { data: rooms, error: roomsError } = await supabase
           .from("sprint_rooms")
@@ -122,45 +148,53 @@ export default function StudyRoomsPage() {
     const roomSubscription = supabase
       .channel("rooms_changes")
       .on(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         "postgres_changes" as any,
         {
           event: "*",
           schema: "public",
           table: "sprint_rooms",
         },
-        async () => {
-          // Refetch all rooms when any room changes
-          fetchStudyRooms();
+        async (payload) => {
+          // Handle room updates
+          if (payload.eventType === "UPDATE" && !payload.new.is_active) {
+            // Immediately remove disabled room from the list
+            setStudyRooms((prev) =>
+              prev.filter((room) => room.id !== payload.new.id)
+            );
+            // Redirect to rooms page if user is in the disabled room
+            if (window.location.pathname.includes(payload.new.id)) {
+              router.push("/dashboard/rooms");
+            }
+          } else {
+            // For other changes, refetch the rooms
+            fetchStudyRooms();
+          }
         }
       )
       .subscribe();
 
-    const participantSubscription = supabase
-      .channel("participants_changes")
+    const channel = supabase
+      .channel("participant_changes")
       .on(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         "postgres_changes" as any,
         {
           event: "*",
           schema: "public",
           table: "sprint_participants",
         },
-        async (payload: ParticipantPayload) => {
-          // When a participant changes, update the count for that room
-          const roomId = payload.new?.room_id || payload.old?.room_id;
-          if (roomId) {
-            const { count, error } = await supabase
-              .from("sprint_participants")
-              .select("*", { count: "exact", head: true })
-              .eq("room_id", roomId)
-              .eq("is_active", true);
-
-            if (!error && count !== null) {
-              setStudyRooms((prevRooms) =>
-                prevRooms.map((room) =>
-                  room.id === roomId ? { ...room, participants: count } : room
-                )
-              );
+        async (payload: { new: RoomParticipantPayload }) => {
+          if (payload.new) {
+            // If the current user is kicked out (set to inactive), redirect to rooms page
+            if (
+              !payload.new.is_active &&
+              payload.new.user_id === currentUserId
+            ) {
+              router.push("/dashboard/rooms");
             }
+            // Refetch rooms to get updated participant counts
+            fetchStudyRooms();
           }
         }
       )
@@ -168,9 +202,9 @@ export default function StudyRoomsPage() {
 
     return () => {
       roomSubscription.unsubscribe();
-      participantSubscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
-  }, []);
+  }, [currentUserId, router]);
 
   return (
     <div>

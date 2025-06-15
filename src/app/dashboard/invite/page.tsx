@@ -35,8 +35,8 @@ export default function InvitePage() {
             Coming Soon
           </h3>
           <p className="text-gray-600 mb-4">
-            The invite feature is currently under development. You'll be able to
-            invite friends to your study sessions soon!
+            The invite feature is currently under development. You&apos;ll be
+            able to invite friends to your study sessions soon!
           </p>
           <button
             onClick={() => window.history.back()}

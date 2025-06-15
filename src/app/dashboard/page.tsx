@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Card } from "@/app/components/ui/card";
 import Link from "next/link";
 import { supabase } from "../lib/supabaseClient";
-import { useRouter } from "next/navigation";
 
 // Types for our data
 interface StudyStats {
@@ -14,36 +13,6 @@ interface StudyStats {
   streak: number;
 }
 
-interface StudyRoom {
-  id: string;
-  name: string;
-  subject: string;
-  participants: number;
-  maxParticipants: number;
-  duration: number;
-  startTime: string;
-  status: "scheduled" | "active" | "completed";
-}
-
-interface StudySession {
-  id: string;
-  subject: string;
-  duration: number;
-  timestamp: string;
-  focusScore: number;
-  roomName?: string;
-  participants?: number;
-  notes?: string;
-  tags?: string[];
-}
-
-interface UpcomingSession {
-  id: string;
-  subject: string;
-  scheduledTime: string;
-  duration: number;
-}
-
 interface RecentActivity {
   id: string;
   room_id: string;
@@ -51,35 +20,6 @@ interface RecentActivity {
   subject: string;
   created_at: string;
   participants: number;
-}
-
-interface RoomData {
-  id: string;
-  title: string;
-  created_at: string;
-  created_by: string;
-}
-
-interface ParticipantData {
-  id: string;
-  room_id: string;
-  user_id: string;
-  joined_at: string;
-  sprint_rooms: {
-    title: string;
-  };
-}
-
-interface ParticipantWithRoom {
-  id: string;
-  room_id: string;
-  joined_at: string;
-  sprint_rooms: {
-    id: string;
-    title: string;
-    subject: string;
-    created_at: string;
-  };
 }
 
 function ActivitySkeleton() {
@@ -118,7 +58,6 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<StudyStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
-  const router = useRouter();
 
   // Template data for when no real data is available
   const templateStats: StudyStats = {

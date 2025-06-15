@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import Link from "next/link";
 
 const Nav = ({ page }: { page: string }) => {
   const router = useRouter();
@@ -9,29 +9,29 @@ const Nav = ({ page }: { page: string }) => {
       {/* Navbar */}
       <nav className="w-full px-4 sm:px-6 py-4 flex items-center justify-between bg-white bg-opacity-90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="flex items-center">
-          <a href="/">
+          <Link href="/">
             <span className="text-xl font-bold text-blue-600">StudySprint</span>
-          </a>
+          </Link>
         </div>
         <div className="hidden md:flex items-center space-x-8">
-          <a
+          <Link
             href="/#features"
             className="text-gray-600 hover:text-blue-600 transition-colors"
           >
             Features
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#"
             className="text-gray-600 hover:text-blue-600 transition-colors"
           >
             Pricing
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#"
             className="text-gray-600 hover:text-blue-600 transition-colors"
           >
             About
-          </a>
+          </Link>
           <button
             onClick={() => {
               router.push("/signin");

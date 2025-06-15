@@ -35,8 +35,8 @@ export default function FocusPage() {
             Coming Soon
           </h3>
           <p className="text-gray-600 mb-4">
-            The focus timer feature is currently under development. You'll be
-            able to track your focus time during study sessions soon!
+            The focus timer feature is currently under development. You&apos;ll
+            be able to track your focus time during study sessions soon!
           </p>
           <button
             onClick={() => window.history.back()}

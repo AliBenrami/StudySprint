@@ -172,8 +172,8 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600">
-                "StudySprint helped me stay focused during finals week. The live
-                community aspect kept me accountable!"
+                &quot;StudySprint helped me stay focused during finals week. The
+                live community aspect kept me accountable!&quot;
               </p>
             </div>
 
@@ -188,8 +188,9 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600">
-                "I love the matchmaking feature! Being paired with other med
-                students keeps me motivated during long study sessions."
+                &quot;I love the matchmaking feature! Being paired with other
+                med students keeps me motivated during long study
+                sessions.&quot;
               </p>
             </div>
 
@@ -204,8 +205,8 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600">
-                "The sprint timer and task board combination has doubled my
-                productivity. This app is a game changer!"
+                &quot;The sprint timer and task board combination has doubled my
+                productivity. This app is a game changer!&quot;
               </p>
             </div>
           </div>
