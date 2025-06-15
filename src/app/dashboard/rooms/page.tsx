@@ -24,27 +24,27 @@ interface RoomParticipantPayload {
 
 function LoadingSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       {[...Array(6)].map((_, index) => (
-        <Card key={index} className="p-6 animate-pulse">
-          <div className="flex justify-between items-start mb-4">
+        <Card key={index} className="p-4 sm:p-6 animate-pulse">
+          <div className="flex justify-between items-start mb-3 sm:mb-4">
             <div>
-              <div className="h-5 w-32 bg-gray-200 rounded mb-2"></div>
-              <div className="h-4 w-24 bg-gray-200 rounded"></div>
+              <div className="h-4 sm:h-5 w-24 sm:w-32 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 sm:h-4 w-20 sm:w-24 bg-gray-200 rounded"></div>
             </div>
-            <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+            <div className="h-5 sm:h-6 w-14 sm:w-16 bg-gray-200 rounded-full"></div>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <div className="h-4 w-20 bg-gray-200 rounded"></div>
-              <div className="h-4 w-16 bg-gray-200 rounded"></div>
+              <div className="h-3 sm:h-4 w-16 sm:w-20 bg-gray-200 rounded"></div>
+              <div className="h-3 sm:h-4 w-12 sm:w-16 bg-gray-200 rounded"></div>
             </div>
             <div className="flex justify-between">
-              <div className="h-4 w-24 bg-gray-200 rounded"></div>
-              <div className="h-4 w-20 bg-gray-200 rounded"></div>
+              <div className="h-3 sm:h-4 w-20 sm:w-24 bg-gray-200 rounded"></div>
+              <div className="h-3 sm:h-4 w-16 sm:w-20 bg-gray-200 rounded"></div>
             </div>
           </div>
-          <div className="h-10 w-full bg-gray-200 rounded-lg mt-4"></div>
+          <div className="h-9 sm:h-10 w-full bg-gray-200 rounded-lg mt-3 sm:mt-4"></div>
         </Card>
       ))}
     </div>
@@ -209,16 +209,20 @@ export default function StudyRoomsPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900">Study Rooms</h1>
-        <p className="text-gray-600 mt-2">Create and join study sessions</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+          Study Rooms
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+          Create and join study sessions
+        </p>
       </div>
 
       {/* Create Room Button */}
       <div className="mb-6">
         <button
           onClick={() => router.push("/dashboard/rooms/create")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-3 rounded-lg transition-colors text-sm sm:text-base font-medium shadow-sm hover:shadow-md"
         >
           Create Room
         </button>
@@ -228,23 +232,23 @@ export default function StudyRoomsPage() {
       {loading ? (
         <LoadingSkeleton />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {studyRooms.length > 0 ? (
             studyRooms.map((room) => (
               <Card
                 key={room.id}
-                className="p-6 hover:shadow-lg hover:border-blue-200 transition-all duration-200"
+                className="p-4 sm:p-6 hover:shadow-lg hover:border-blue-200 transition-all duration-200"
               >
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Header */}
                   <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <h3 className="text-xl font-semibold text-gray-900">
+                    <div className="space-y-1 min-w-0">
+                      <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">
                         {room.title}
                       </h3>
-                      <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
                         <svg
-                          className="w-4 h-4"
+                          className="w-3 h-3 sm:w-4 sm:h-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -261,9 +265,9 @@ export default function StudyRoomsPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-full">
+                    <div className="flex items-center space-x-1 sm:space-x-2 bg-blue-50 px-2 sm:px-3 py-1 rounded-full ml-2">
                       <svg
-                        className="w-4 h-4 text-blue-600"
+                        className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -275,7 +279,7 @@ export default function StudyRoomsPage() {
                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                         />
                       </svg>
-                      <span className="text-sm font-medium text-blue-600">
+                      <span className="text-xs sm:text-sm font-medium text-blue-600">
                         {room.participants}{" "}
                         {room.participants === 1
                           ? "participant"
@@ -285,14 +289,14 @@ export default function StudyRoomsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center justify-end space-x-3 pt-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-2">
                     {currentUserId === room.created_by && room.is_active && (
                       <button
                         onClick={() => disableRoom(room.id)}
-                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 hover:bg-red-50 hover:border-red-300 rounded-lg transition-all duration-200 shadow-sm hover:shadow"
+                        className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-medium text-red-600 bg-white border border-red-200 hover:bg-red-50 hover:border-red-300 rounded-lg transition-all duration-200 shadow-sm hover:shadow"
                       >
                         <svg
-                          className="w-4 h-4 mr-1.5"
+                          className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -310,14 +314,14 @@ export default function StudyRoomsPage() {
                     <button
                       onClick={() => router.push(`/dashboard/rooms/${room.id}`)}
                       disabled={!room.is_active}
-                      className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 shadow-sm ${
+                      className={`w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-sm ${
                         room.is_active
                           ? "bg-blue-600 hover:bg-blue-700 text-white hover:shadow-md"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       }`}
                     >
                       <svg
-                        className="w-4 h-4 mr-1.5"
+                        className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -337,11 +341,11 @@ export default function StudyRoomsPage() {
             ))
           ) : (
             <div className="col-span-full">
-              <Card className="p-6">
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <Card className="p-4 sm:p-6">
+                <div className="text-center py-6 sm:py-8">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
                     <svg
-                      className="w-8 h-8 text-gray-400"
+                      className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -354,16 +358,16 @@ export default function StudyRoomsPage() {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
                     No Study Rooms Yet
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-sm sm:text-base text-gray-600 mb-4">
                     Create your first study room to start collaborating with
                     others
                   </p>
                   <button
                     onClick={() => router.push("/dashboard/rooms/create")}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-3 rounded-lg transition-colors text-sm sm:text-base font-medium shadow-sm hover:shadow-md"
                   >
                     Create Your First Room
                   </button>
@@ -375,15 +379,17 @@ export default function StudyRoomsPage() {
       )}
 
       {/* Quick Tips */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Quick Tips</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mt-8 sm:mt-12">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-4">
+          Quick Tips
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <Link href="/dashboard/rooms/create">
-            <Card className="p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
-              <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Card className="p-4 sm:p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
+              <div className="flex items-start space-x-3 sm:space-x-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg
-                    className="w-6 h-6 text-blue-600"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -397,8 +403,10 @@ export default function StudyRoomsPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Set a Duration</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900">
+                    Set a Duration
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
                     Choose a study session length that works for you and your
                     group
                   </p>
@@ -407,11 +415,11 @@ export default function StudyRoomsPage() {
             </Card>
           </Link>
           <Link href="/dashboard/invite">
-            <Card className="p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
-              <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Card className="p-4 sm:p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
+              <div className="flex items-start space-x-3 sm:space-x-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg
-                    className="w-6 h-6 text-green-600"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-green-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -425,8 +433,10 @@ export default function StudyRoomsPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Invite Friends</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900">
+                    Invite Friends
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
                     Study together by inviting friends to your study room
                   </p>
                 </div>
@@ -434,11 +444,11 @@ export default function StudyRoomsPage() {
             </Card>
           </Link>
           <Link href="/dashboard/focus">
-            <Card className="p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
-              <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Card className="p-4 sm:p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
+              <div className="flex items-start space-x-3 sm:space-x-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg
-                    className="w-6 h-6 text-purple-600"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -452,8 +462,10 @@ export default function StudyRoomsPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Stay Focused</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900">
+                    Stay Focused
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
                     Use the focus timer to maintain productivity during sessions
                   </p>
                 </div>

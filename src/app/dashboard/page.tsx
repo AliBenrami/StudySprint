@@ -219,19 +219,23 @@ export default function DashboardPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900">Overview</h1>
-        <p className="text-gray-600 mt-2">Track your study progress</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+          Overview
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+          Track your study progress
+        </p>
       </div>
 
       {/* Stats Grid */}
       <div
         id="stats"
-        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-1000 ${
+        className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 transition-all duration-1000 ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
         }`}
       >
-        <Card className="p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
+        <Card className="p-4 sm:p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
           <h3 className="text-sm font-medium text-gray-500">Total Sessions</h3>
           {isLoading ? (
             <div className="animate-pulse">
@@ -240,16 +244,16 @@ export default function DashboardPage() {
             </div>
           ) : (
             <>
-              <p className="text-2xl font-bold mt-2 text-blue-600">
+              <p className="text-xl sm:text-2xl font-bold mt-2 text-blue-600">
                 {stats?.totalSessions ?? templateStats.totalSessions}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
                 Start your first session!
               </p>
             </>
           )}
         </Card>
-        <Card className="p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
+        <Card className="p-4 sm:p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
           <h3 className="text-sm font-medium text-gray-500">Study Time</h3>
           {isLoading ? (
             <div className="animate-pulse">
@@ -258,16 +262,16 @@ export default function DashboardPage() {
             </div>
           ) : (
             <>
-              <p className="text-2xl font-bold mt-2 text-indigo-600">
+              <p className="text-xl sm:text-2xl font-bold mt-2 text-indigo-600">
                 {stats?.studyTime ?? templateStats.studyTime}h
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
                 Track your study hours
               </p>
             </>
           )}
         </Card>
-        <Card className="p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
+        <Card className="p-4 sm:p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
           <h3 className="text-sm font-medium text-gray-500">Focus Score</h3>
           {isLoading ? (
             <div className="animate-pulse">
@@ -276,14 +280,16 @@ export default function DashboardPage() {
             </div>
           ) : (
             <>
-              <p className="text-2xl font-bold mt-2 text-green-600">
+              <p className="text-xl sm:text-2xl font-bold mt-2 text-green-600">
                 {stats?.focusScore ?? templateStats.focusScore}%
               </p>
-              <p className="text-sm text-gray-500 mt-1">Measure your focus</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                Measure your focus
+              </p>
             </>
           )}
         </Card>
-        <Card className="p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
+        <Card className="p-4 sm:p-6 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all">
           <h3 className="text-sm font-medium text-gray-500">Streak</h3>
           {isLoading ? (
             <div className="animate-pulse">
@@ -292,35 +298,40 @@ export default function DashboardPage() {
             </div>
           ) : (
             <>
-              <p className="text-2xl font-bold mt-2 text-purple-600">
+              <p className="text-xl sm:text-2xl font-bold mt-2 text-purple-600">
                 {stats?.streak ?? templateStats.streak} days
               </p>
-              <p className="text-sm text-gray-500 mt-1">Build your streak</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                Build your streak
+              </p>
             </>
           )}
         </Card>
       </div>
 
       {/* Recent Activity Section */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+      <div className="mt-8 sm:mt-12">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
           Recent Study Rooms
         </h2>
         {isLoading ? (
           <ActivitySkeleton />
         ) : recentActivity.length > 0 ? (
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <div className="space-y-4">
               {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                <div
+                  key={activity.id}
+                  className="flex items-center space-x-3 sm:space-x-4"
+                >
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded-full flex items-center justify-center">
                     {getActivityIcon()}
                   </div>
-                  <div className="flex-1">
-                    <p className="text-gray-900 font-medium">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm sm:text-base text-gray-900 font-medium truncate">
                       {activity.room_title}
                     </p>
-                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
                       <span>{activity.subject}</span>
                       <span>•</span>
                       <span>
@@ -331,7 +342,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                     {new Date(activity.created_at).toLocaleDateString()}
                   </div>
                 </div>
@@ -339,11 +350,11 @@ export default function DashboardPage() {
             </div>
           </Card>
         ) : (
-          <Card className="p-6">
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+          <Card className="p-4 sm:p-6">
+            <div className="text-center py-6 sm:py-8">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <svg
-                  className="w-8 h-8 text-gray-400"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -356,8 +367,10 @@ export default function DashboardPage() {
                   />
                 </svg>
               </div>
-              <p className="text-gray-600">No recent study rooms</p>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm sm:text-base text-gray-600">
+                No recent study rooms
+              </p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-2">
                 Join a study room to see it here
               </p>
             </div>
@@ -366,15 +379,17 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="mt-8 sm:mt-12">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <Link href="/dashboard/rooms">
-            <Card className="p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <Card className="p-4 sm:p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-blue-600"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -388,10 +403,10 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900">
                     Create Study Room
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs sm:text-sm text-gray-500">
                     Start a new study session
                   </p>
                 </div>
@@ -399,12 +414,11 @@ export default function DashboardPage() {
             </Card>
           </Link>
           <Link href="/dashboard/history">
-            {" "}
-            <Card className="p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <Card className="p-4 sm:p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-green-600"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-green-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -418,8 +432,10 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">View History</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900">
+                    View History
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-500">
                     Check your study records
                   </p>
                 </div>

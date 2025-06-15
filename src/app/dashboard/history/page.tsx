@@ -178,16 +178,18 @@ export default function StudyHistoryPage() {
   }
 
   return (
-    <div>
+    <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900">Study History</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          Study History
+        </h1>
         <p className="text-gray-600 mt-2">View your completed study sessions</p>
       </div>
 
       {/* Filters */}
-      <Card className="p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Card className="p-4 sm:p-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Subject
@@ -198,7 +200,7 @@ export default function StudyHistoryPage() {
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, subject: e.target.value }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
               placeholder="Filter by subject"
             />
           </div>
@@ -212,7 +214,7 @@ export default function StudyHistoryPage() {
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, startDate: e.target.value }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
             />
           </div>
           <div>
@@ -225,21 +227,21 @@ export default function StudyHistoryPage() {
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, endDate: e.target.value }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
             />
           </div>
         </div>
       </Card>
 
       {/* Sort Controls */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex space-x-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 mb-6">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
           <select
             value={sortBy}
             onChange={(e) =>
               setSortBy(e.target.value as "date" | "participants")
             }
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-auto px-4 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
           >
             <option value="date">Sort by Date</option>
             <option value="participants">Sort by Participants</option>
@@ -248,7 +250,7 @@ export default function StudyHistoryPage() {
             onClick={() =>
               setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
             }
-            className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-auto px-4 py-3 sm:py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
           >
             {sortOrder === "asc" ? "↑ Ascending" : "↓ Descending"}
           </button>
@@ -259,19 +261,19 @@ export default function StudyHistoryPage() {
       <div className="space-y-4">
         {studyHistory.length > 0 ? (
           getFilteredHistory().map((room) => (
-            <Card key={room.id} className="p-6">
-              <div className="flex justify-between items-start">
+            <Card key={room.id} className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
                 <div>
                   <h3 className="font-semibold text-gray-900">{room.title}</h3>
                   <p className="text-sm text-gray-500">{room.subject}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="text-sm text-gray-500">
                     {new Date(room.created_at).toLocaleDateString()}
                   </p>
                 </div>
               </div>
-              <div className="mt-4 flex items-center justify-between">
+              <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
                     <svg
@@ -304,7 +306,7 @@ export default function StudyHistoryPage() {
                         deleteRoom(room.id);
                       }
                     }}
-                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 hover:bg-red-50 hover:border-red-300 rounded-lg transition-all duration-200"
+                    className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 text-sm font-medium text-red-600 bg-white border border-red-200 hover:bg-red-50 hover:border-red-300 rounded-lg transition-all duration-200"
                   >
                     <svg
                       className="w-4 h-4 mr-1.5"
@@ -326,11 +328,11 @@ export default function StudyHistoryPage() {
             </Card>
           ))
         ) : (
-          <Card className="p-6">
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+          <Card className="p-4 sm:p-6">
+            <div className="text-center py-6 sm:py-8">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <svg
-                  className="w-8 h-8 text-gray-400"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -351,7 +353,7 @@ export default function StudyHistoryPage() {
               </p>
               <button
                 onClick={() => (window.location.href = "/dashboard/rooms")}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 sm:py-2 rounded-lg transition-colors text-base sm:text-sm"
               >
                 Start a Study Session
               </button>

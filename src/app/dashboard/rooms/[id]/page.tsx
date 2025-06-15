@@ -492,11 +492,11 @@ export default function StudyRoomPage({
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="mb-8">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
         <button
           onClick={() => router.push("/dashboard/rooms")}
-          className="text-gray-600 hover:text-gray-900 mb-4 flex items-center"
+          className="text-gray-600 hover:text-gray-900 mb-4 flex items-center text-sm sm:text-base"
         >
           <svg
             className="w-5 h-5 mr-2"
@@ -513,17 +513,19 @@ export default function StudyRoomPage({
           </svg>
           Back to Rooms
         </button>
-        <h1 className="text-4xl font-bold text-gray-900">{room.title}</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          {room.title}
+        </h1>
         <p className="text-gray-600 mt-2">
           Created {new Date(room.created_at).toLocaleDateString()}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Study Session Card */}
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">
                   Study Session
@@ -539,14 +541,14 @@ export default function StudyRoomPage({
               {isOwner &&
                 (currentSession ? (
                   <button
-                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors"
+                    className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-6 py-3 sm:py-2 rounded-lg transition-colors text-base sm:text-sm"
                     onClick={endSession}
                   >
                     End Session
                   </button>
                 ) : (
                   <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 sm:py-2 rounded-lg transition-colors text-base sm:text-sm"
                     onClick={startSession}
                   >
                     Start Session
@@ -556,10 +558,10 @@ export default function StudyRoomPage({
 
             {!currentSession && isOwner && (
               <div className="border-t border-gray-200 pt-4">
-                <div className="flex items-center space-x-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                   <label
                     htmlFor="duration"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-gray-700 whitespace-nowrap"
                   >
                     Session Duration:
                   </label>
@@ -567,7 +569,7 @@ export default function StudyRoomPage({
                     id="duration"
                     value={sessionDuration}
                     onChange={(e) => setSessionDuration(Number(e.target.value))}
-                    className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   >
                     <option value={5}>5 minutes</option>
                     <option value={10}>10 minutes</option>
@@ -584,7 +586,7 @@ export default function StudyRoomPage({
 
             {currentSession && (
               <div className="border-t border-gray-200 pt-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium text-gray-900 mb-3 sm:mb-2">
                   Session Info
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
@@ -607,15 +609,15 @@ export default function StudyRoomPage({
         </Card>
 
         {/* Participants Card */}
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Participants ({participants.length})
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {participants.map((participant) => (
               <div
                 key={participant.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-gray-50 rounded-lg space-y-2 sm:space-y-0"
               >
                 <div>
                   <p className="text-gray-900">
@@ -636,7 +638,7 @@ export default function StudyRoomPage({
         </Card>
 
         {/* Current Task Card */}
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6 lg:col-span-2">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Current Task{" "}
             {isUpdatingTask && (
@@ -645,7 +647,7 @@ export default function StudyRoomPage({
           </h2>
           <div className="space-y-4">
             <textarea
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[100px] sm:min-h-[120px]"
               rows={3}
               placeholder="What are you working on?"
               value={currentTask}

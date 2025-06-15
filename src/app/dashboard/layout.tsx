@@ -43,7 +43,7 @@ export default function DashboardLayout({
       {/* Navigation Menu with Hamburger Button */}
       <div
         className={`fixed top-0 left-0 h-full bg-white shadow-lg transform transition-all duration-300 ease-in-out z-40 ${
-          isMenuOpen ? "w-64" : "w-16"
+          isMenuOpen ? "w-64" : "w-0 sm:w-16"
         }`}
       >
         {/* Menu Content */}
@@ -51,8 +51,8 @@ export default function DashboardLayout({
           {/* Hamburger Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`absolute top-5 p-2 rounded-lg hover:bg-gray-50 transition-all duration-300 z-50  ${
-              isMenuOpen ? "left-45" : "left-3"
+            className={`fixed top-5 p-2 rounded-lg hover:bg-gray-50 transition-all duration-300 z-50 ${
+              isMenuOpen ? "left-[13rem] sm:left-45" : "left-3"
             }`}
           >
             <svg
@@ -81,13 +81,13 @@ export default function DashboardLayout({
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
               StudySprint
             </h2>
-            <nav className="space-y-2  flex flex-col justify-between">
+            <nav className="space-y-2 flex flex-col justify-between h-[calc(100vh-8rem)]">
               <div>
                 {menuItems.map((item) => (
                   <Link
                     key={item.path}
                     href={item.path}
-                    className={`block px-4 py-2 rounded-lg transition-colors ${
+                    className={`block px-4 py-3 rounded-lg transition-colors ${
                       pathname == item.path
                         ? "bg-blue-50 text-blue-600"
                         : "text-gray-600 hover:bg-gray-50"
@@ -101,7 +101,7 @@ export default function DashboardLayout({
 
               <button
                 onClick={signOut}
-                className="block w-full px-4 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-red-500 text-left"
+                className="block w-full px-4 py-3 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-red-500 text-left"
               >
                 Sign Out
               </button>
@@ -110,13 +110,22 @@ export default function DashboardLayout({
         </div>
       </div>
 
+      {/* Overlay for mobile menu */}
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 bg-white/30 backdrop-blur-[2px] z-30 sm:hidden"
+          onClick={() => setIsMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Main Content */}
       <div
         className={`relative z-10 transition-all duration-300 ${
-          isMenuOpen ? "ml-64" : "ml-16"
+          isMenuOpen ? "sm:ml-64" : "sm:ml-16"
         }`}
       >
-        <main className="p-32 pt-16">{children}</main>
+        <main className="p-4 sm:p-6 md:p-8 lg:p-12 pt-16">{children}</main>
       </div>
     </div>
   );

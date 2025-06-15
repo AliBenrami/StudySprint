@@ -37,14 +37,16 @@ export default function CreateRoomPage() {
   };
 
   return (
-    <div>
+    <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900">Create Study Room</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          Create Study Room
+        </h1>
         <p className="text-gray-600 mt-2">Set up your study session</p>
       </div>
 
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -54,7 +56,7 @@ export default function CreateRoomPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
               placeholder="e.g., Math Study Group"
               required
             />
@@ -68,23 +70,23 @@ export default function CreateRoomPage() {
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
               placeholder="e.g., Calculus"
               required
             />
           </div>
 
-          <div className="flex justify-end space-x-4">
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              className="w-full sm:w-auto px-4 py-3 sm:py-2 text-gray-600 hover:text-gray-800 text-base sm:text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 sm:py-2 rounded-lg transition-colors text-base sm:text-sm"
             >
               Create Room
             </button>
@@ -93,16 +95,16 @@ export default function CreateRoomPage() {
       </Card>
 
       {/* Quick Tips */}
-      <div className="mt-8">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">
+      <div className="mt-8 sm:mt-12">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
           Duration Tips
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card className="p-4">
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg
-                  className="w-5 h-5 text-blue-600"
+                  className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -125,9 +127,9 @@ export default function CreateRoomPage() {
           </Card>
           <Card className="p-4">
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg
-                  className="w-5 h-5 text-green-600"
+                  className="w-5 h-5 sm:w-6 sm:h-6 text-green-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -150,9 +152,9 @@ export default function CreateRoomPage() {
           </Card>
           <Card className="p-4">
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg
-                  className="w-5 h-5 text-purple-600"
+                  className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
